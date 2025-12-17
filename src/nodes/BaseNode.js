@@ -2,6 +2,7 @@
 // Reusable node container with common structure
 
 import { Handle, Position } from 'reactflow';
+import { designTokens } from '../designSystem';
 
 /**
  * BaseNode - A reusable container for all node types
@@ -17,15 +18,64 @@ import { Handle, Position } from 'reactflow';
  */
 export const BaseNode = ({ id, title, inputs = [], outputs = [], children, style = {} }) => {
   const baseStyle = {
-    width: 200,
-    height: 80,
-    border: '1px solid black',
+    width: 240,
+    minHeight: 100,
+    backgroundColor: designTokens.colors.nodeBg,
+    border: `1.5px solid ${designTokens.colors.nodeBorder}`,
+    borderRadius: designTokens.borderRadius.lg,
+    boxShadow: designTokens.shadows.md,
     position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    transition: `all ${designTokens.transitions.normal}`,
+    fontFamily: designTokens.typography.fontFamily,
     ...style
   };
 
+  const headerStyle = {
+    padding: `${designTokens.spacing.md} ${designTokens.spacing.lg}`,
+    borderBottom: `1px solid ${designTokens.colors.nodeBorder}`,
+    backgroundColor: designTokens.colors.bgSecondary,
+    borderTopLeftRadius: designTokens.borderRadius.lg,
+    borderTopRightRadius: designTokens.borderRadius.lg,
+  };
+
+  const titleStyle = {
+    fontSize: designTokens.typography.fontSize.sm,
+    fontWeight: designTokens.typography.fontWeight.semibold,
+    color: designTokens.colors.textPrimary,
+    letterSpacing: '0.01em',
+    textTransform: 'uppercase',
+  };
+
+  const contentStyle = {
+    padding: designTokens.spacing.lg,
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: designTokens.spacing.md,
+  };
+
+  const handleStyle = {
+    width: '12px',
+    height: '12px',
+    backgroundColor: designTokens.colors.handleBg,
+    border: `2px solid ${designTokens.colors.handleBorder}`,
+    borderRadius: '50%',
+  };
+
   return (
-    <div style={baseStyle}>
+    <div 
+      style={baseStyle}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = designTokens.colors.nodeBorderHover;
+        e.currentTarget.style.boxShadow = designTokens.shadows.lg;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = designTokens.colors.nodeBorder;
+        e.currentTarget.style.boxShadow = designTokens.shadows.md;
+      }}
+    >
       {/* Input handles (typically on the left) */}
       {inputs.map((input, index) => (
         <Handle
@@ -33,17 +83,20 @@ export const BaseNode = ({ id, title, inputs = [], outputs = [], children, style
           type={input.type || 'target'}
           position={input.position || Position.Left}
           id={input.id || `${id}-input-${index}`}
-          style={input.style}
+          style={{
+            ...handleStyle,
+            ...input.style
+          }}
         />
       ))}
 
       {/* Title/Header */}
-      <div>
-        <span>{title}</span>
+      <div style={headerStyle}>
+        <span style={titleStyle}>{title}</span>
       </div>
 
       {/* Content slot - node-specific content goes here */}
-      <div>
+      <div style={contentStyle}>
         {children}
       </div>
 
@@ -54,7 +107,10 @@ export const BaseNode = ({ id, title, inputs = [], outputs = [], children, style
           type={output.type || 'source'}
           position={output.position || Position.Right}
           id={output.id || `${id}-output-${index}`}
-          style={output.style}
+          style={{
+            ...handleStyle,
+            ...output.style
+          }}
         />
       ))}
     </div>
