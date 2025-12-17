@@ -1,16 +1,30 @@
 // textNode.js
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Position } from 'reactflow';
 import { BaseNode } from './BaseNode';
-import { NodeFormGroup, NodeLabel, NodeInput } from './NodeFormElements';
+import { NodeFormGroup, NodeLabel, NodeTextarea } from './NodeFormElements';
 
 export const TextNode = ({ id, data }) => {
   const [currText, setCurrText] = useState(data?.text || '{{input}}');
+  const textareaRef = useRef(null);
 
   const handleTextChange = (e) => {
     setCurrText(e.target.value);
+    // Auto-resize textarea
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
   };
+
+  // Set initial height on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, []);
 
   return (
     <BaseNode
@@ -26,12 +40,13 @@ export const TextNode = ({ id, data }) => {
     >
       <NodeFormGroup>
         <NodeLabel htmlFor={`${id}-text`}>Text Content</NodeLabel>
-        <NodeInput
+        <NodeTextarea
+          ref={textareaRef}
           id={`${id}-text`}
-          type="text"
           value={currText}
           onChange={handleTextChange}
           placeholder="Enter text or template"
+          rows={2}
         />
       </NodeFormGroup>
     </BaseNode>

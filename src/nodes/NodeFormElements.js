@@ -1,6 +1,7 @@
 // NodeFormElements.js
 // Styled form elements for consistent node UI
 
+import React from 'react';
 import { designTokens } from '../designSystem';
 
 export const NodeLabel = ({ children, htmlFor, required }) => {
@@ -35,6 +36,8 @@ export const NodeInput = ({ type = 'text', value, onChange, placeholder, id, ...
     transition: `all ${designTokens.transitions.fast}`,
     fontFamily: designTokens.typography.fontFamily,
     boxSizing: 'border-box',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
   };
 
   return (
@@ -95,11 +98,56 @@ export const NodeSelect = ({ value, onChange, children, id, ...props }) => {
   );
 };
 
+export const NodeTextarea = React.forwardRef(({ value, onChange, placeholder, id, rows = 3, ...props }, ref) => {
+  const textareaStyle = {
+    width: '100%',
+    padding: `${designTokens.spacing.sm} ${designTokens.spacing.md}`,
+    fontSize: designTokens.typography.fontSize.sm,
+    color: designTokens.colors.textPrimary,
+    backgroundColor: designTokens.colors.bgPrimary,
+    border: `1px solid ${designTokens.colors.nodeBorder}`,
+    borderRadius: designTokens.borderRadius.md,
+    outline: 'none',
+    transition: `all ${designTokens.transitions.fast}`,
+    fontFamily: designTokens.typography.fontFamily,
+    boxSizing: 'border-box',
+    resize: 'vertical', // Allow vertical resizing
+    minHeight: `${rows * 1.5}em`,
+    maxHeight: '300px', // Prevent excessive growth
+    lineHeight: designTokens.typography.lineHeight.normal,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    overflowY: 'auto', // Show scrollbar if content exceeds maxHeight
+  };
+
+  return (
+    <textarea
+      ref={ref}
+      id={id}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      rows={rows}
+      style={textareaStyle}
+      onFocus={(e) => {
+        e.target.style.borderColor = designTokens.colors.primary;
+        e.target.style.boxShadow = `0 0 0 3px ${designTokens.colors.primaryLight}`;
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = designTokens.colors.nodeBorder;
+        e.target.style.boxShadow = 'none';
+      }}
+      {...props}
+    />
+  );
+});
+
 export const NodeFormGroup = ({ children, style = {} }) => {
   const groupStyle = {
     display: 'flex',
     flexDirection: 'column',
     gap: designTokens.spacing.xs,
+    width: '100%', // Ensure full width
     ...style
   };
 
