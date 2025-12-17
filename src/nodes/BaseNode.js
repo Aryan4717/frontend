@@ -20,6 +20,7 @@ export const BaseNode = ({ id, title, inputs = [], outputs = [], children, style
   const baseStyle = {
     width: 240,
     minHeight: 100,
+    height: 'auto', // Allow node to grow with content
     backgroundColor: designTokens.colors.nodeBg,
     border: `1.5px solid ${designTokens.colors.nodeBorder}`,
     borderRadius: designTokens.borderRadius.lg,
@@ -29,6 +30,7 @@ export const BaseNode = ({ id, title, inputs = [], outputs = [], children, style
     flexDirection: 'column',
     transition: `all ${designTokens.transitions.normal}`,
     fontFamily: designTokens.typography.fontFamily,
+    overflow: 'visible', // Ensure content is not clipped
     ...style
   };
 
@@ -50,10 +52,12 @@ export const BaseNode = ({ id, title, inputs = [], outputs = [], children, style
 
   const contentStyle = {
     padding: designTokens.spacing.lg,
-    flex: 1,
+    flex: '1 1 auto', // Allow content to grow and shrink
     display: 'flex',
     flexDirection: 'column',
     gap: designTokens.spacing.md,
+    minHeight: 0, // Allow shrinking below content size
+    overflow: 'visible', // Ensure all content is visible
   };
 
   const handleStyle = {
