@@ -2,8 +2,17 @@
 
 import { Position } from 'reactflow';
 import { BaseNode } from './BaseNode';
+import { designTokens } from '../designSystem';
 
 export const LLMNode = ({ id, data }) => {
+  const descriptionStyle = {
+    fontSize: designTokens.typography.fontSize.sm,
+    color: designTokens.colors.textSecondary,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    padding: designTokens.spacing.sm,
+  };
+
   return (
     <BaseNode
       id={id}
@@ -30,7 +39,7 @@ export const LLMNode = ({ id, data }) => {
         }
       ]}
     >
-      <span>This is a LLM.</span>
+      <span style={descriptionStyle}>Large Language Model</span>
     </BaseNode>
   );
 }

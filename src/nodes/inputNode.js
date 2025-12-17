@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Position } from 'reactflow';
 import { BaseNode } from './BaseNode';
+import { NodeFormGroup, NodeLabel, NodeInput, NodeSelect } from './NodeFormElements';
 
 export const InputNode = ({ id, data }) => {
   const [currName, setCurrName] = useState(data?.inputName || id.replace('customInput-', 'input_'));
@@ -28,21 +29,23 @@ export const InputNode = ({ id, data }) => {
         }
       ]}
     >
-      <label>
-        Name:
-        <input 
-          type="text" 
-          value={currName} 
-          onChange={handleNameChange} 
+      <NodeFormGroup>
+        <NodeLabel htmlFor={`${id}-name`}>Name</NodeLabel>
+        <NodeInput
+          id={`${id}-name`}
+          type="text"
+          value={currName}
+          onChange={handleNameChange}
+          placeholder="Enter input name"
         />
-      </label>
-      <label>
-        Type:
-        <select value={inputType} onChange={handleTypeChange}>
+      </NodeFormGroup>
+      <NodeFormGroup>
+        <NodeLabel htmlFor={`${id}-type`}>Type</NodeLabel>
+        <NodeSelect id={`${id}-type`} value={inputType} onChange={handleTypeChange}>
           <option value="Text">Text</option>
           <option value="File">File</option>
-        </select>
-      </label>
+        </NodeSelect>
+      </NodeFormGroup>
     </BaseNode>
   );
 }
