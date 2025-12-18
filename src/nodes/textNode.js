@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Position } from 'reactflow';
+import { useStore } from '../store';
 import { BaseNode } from './BaseNode';
 import { NodeFormGroup, NodeLabel, NodeTextarea } from './NodeFormElements';
 
@@ -27,11 +28,17 @@ const parseVariables = (text) => {
 };
 
 export const TextNode = ({ id, data }) => {
+  const updateNodeField = useStore((state) => state.updateNodeField);
   const [currText, setCurrText] = useState(data?.text || '{{input}}');
   const textareaRef = useRef(null);
 
   // Parse variables from text reactively
   const variables = useMemo(() => parseVariables(currText), [currText]);
+
+  // Sync to store when text changes
+  useEffect(() => {
+    updateNodeField(id, 'text', currText);
+  }, [id, currText, updateNodeField]);
 
   // Generate input handles dynamically based on variables
   const inputHandles = useMemo(() => {
