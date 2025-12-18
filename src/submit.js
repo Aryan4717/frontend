@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { useStore } from './store';
 import { designTokens } from './designSystem';
 import { preparePipelinePayload, submitPipeline } from './pipelineUtils';
+import { PipelineResults } from './PipelineResults';
 import { shallow } from 'zustand/shallow';
 
 export const SubmitButton = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
-    const [submitMessage, setSubmitMessage] = useState('');
+    const [showResults, setShowResults] = useState(false);
+    const [backendResponse, setBackendResponse] = useState(null);
 
     const { nodes, edges } = useStore(
         (state) => ({
@@ -24,15 +25,18 @@ export const SubmitButton = () => {
         
         // Validate pipeline has content
         if (nodes.length === 0) {
-            setSubmitStatus('error');
-            setSubmitMessage('Pipeline is empty. Add at least one node.');
-            setTimeout(() => setSubmitStatus(null), 3000);
+            setBackendResponse({
+                status: 'error',
+                message: 'Pipeline is empty. Add at least one node.',
+                valid: false,
+            });
+            setShowResults(true);
             return;
         }
 
         setIsSubmitting(true);
-        setSubmitStatus(null);
-        setSubmitMessage('');
+        setShowResults(false);
+        setBackendResponse(null);
 
         try {
             // Prepare minimal payload
@@ -41,23 +45,20 @@ export const SubmitButton = () => {
             // Send to backend
             const result = await submitPipeline(payload);
             
-            setSubmitStatus('success');
-            setSubmitMessage(result.message || 'Pipeline submitted successfully!');
-            
-            // Clear message after 5 seconds
-            setTimeout(() => {
-                setSubmitStatus(null);
-                setSubmitMessage('');
-            }, 5000);
+            // Show results panel with backend response
+            setBackendResponse({
+                status: 'success',
+                ...result,
+            });
+            setShowResults(true);
         } catch (error) {
-            setSubmitStatus('error');
-            setSubmitMessage(error.message || 'Failed to submit pipeline');
-            
-            // Clear error message after 5 seconds
-            setTimeout(() => {
-                setSubmitStatus(null);
-                setSubmitMessage('');
-            }, 5000);
+            // Show error in results panel
+            setBackendResponse({
+                status: 'error',
+                message: error.message || 'Failed to submit pipeline',
+                valid: false,
+            });
+            setShowResults(true);
         } finally {
             setIsSubmitting(false);
         }
@@ -92,47 +93,41 @@ export const SubmitButton = () => {
         opacity: isSubmitting ? 0.7 : 1,
     };
 
-    const messageStyle = {
-        fontSize: designTokens.typography.fontSize.sm,
-        color: submitStatus === 'success' 
-            ? designTokens.colors.success 
-            : submitStatus === 'error'
-            ? designTokens.colors.error
-            : 'transparent',
-        textAlign: 'center',
-        minHeight: '20px',
-        transition: `color ${designTokens.transitions.normal}`,
-    };
-
     return (
-        <div style={containerStyle}>
-            <button 
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                style={buttonStyle}
-                onMouseEnter={(e) => {
-                    if (!isSubmitting) {
-                        e.currentTarget.style.backgroundColor = designTokens.colors.primaryHover;
-                        e.currentTarget.style.boxShadow = designTokens.shadows.md;
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    if (!isSubmitting) {
-                        e.currentTarget.style.backgroundColor = designTokens.colors.primary;
-                        e.currentTarget.style.boxShadow = designTokens.shadows.sm;
-                        e.currentTarget.style.transform = 'translateY(0)';
-                    }
-                }}
-            >
-                {isSubmitting ? 'Submitting...' : 'Submit Pipeline'}
-            </button>
-            {submitMessage && (
-                <div style={messageStyle}>
-                    {submitMessage}
-                </div>
+        <>
+            <div style={containerStyle}>
+                <button 
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    style={buttonStyle}
+                    onMouseEnter={(e) => {
+                        if (!isSubmitting) {
+                            e.currentTarget.style.backgroundColor = designTokens.colors.primaryHover;
+                            e.currentTarget.style.boxShadow = designTokens.shadows.md;
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!isSubmitting) {
+                            e.currentTarget.style.backgroundColor = designTokens.colors.primary;
+                            e.currentTarget.style.boxShadow = designTokens.shadows.sm;
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }
+                    }}
+                >
+                    {isSubmitting ? 'Submitting...' : 'Submit Pipeline'}
+                </button>
+            </div>
+            
+            {showResults && backendResponse && (
+                <PipelineResults
+                    nodes={nodes}
+                    edges={edges}
+                    backendResponse={backendResponse}
+                    onClose={() => setShowResults(false)}
+                />
             )}
-        </div>
+        </>
     );
 }
