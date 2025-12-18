@@ -1,13 +1,24 @@
 // inputNode.js
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Position } from 'reactflow';
+import { useStore } from '../store';
 import { BaseNode } from './BaseNode';
 import { NodeFormGroup, NodeLabel, NodeInput, NodeSelect } from './NodeFormElements';
 
 export const InputNode = ({ id, data }) => {
+  const updateNodeField = useStore((state) => state.updateNodeField);
   const [currName, setCurrName] = useState(data?.inputName || id.replace('customInput-', 'input_'));
   const [inputType, setInputType] = useState(data.inputType || 'Text');
+
+  // Sync to store when values change
+  useEffect(() => {
+    updateNodeField(id, 'inputName', currName);
+  }, [id, currName, updateNodeField]);
+
+  useEffect(() => {
+    updateNodeField(id, 'inputType', inputType);
+  }, [id, inputType, updateNodeField]);
 
   const handleNameChange = (e) => {
     setCurrName(e.target.value);
